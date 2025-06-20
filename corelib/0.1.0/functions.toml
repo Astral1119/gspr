@@ -1,0 +1,31 @@
+[ISNIL]
+description = ""
+definition = "=if(ISSTRUCT(value),ifna(value(lambda(a,b,b))=\"nil\", False))"
+
+[ISNIL.arguments.value]
+description = ""
+example = ""
+
+[ISSTRUCT]
+description = ""
+definition = "=if(type(value)=16,not(iserr(value)))"
+
+[ISSTRUCT.arguments.value]
+description = ""
+example = ""
+
+[NIL]
+description = "The nil object, wrapped with type \"nil\"."
+definition = "=func(#N/A, \"nil\")"
+
+[NIL.arguments.func]
+description = ""
+example = ""
+
+[THROW]
+description = ""
+definition = "=FIELDVALUE(,message)"
+
+[THROW.arguments.message]
+description = ""
+example = ""

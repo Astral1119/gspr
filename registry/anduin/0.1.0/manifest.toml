@@ -1,0 +1,10 @@
+[project]
+name = "anduin"
+version = "0.1.0"
+description = "A functional programming language"
+authors = [
+    "astral",
+]
+
+[project.dependencies]
+corelib = "*"

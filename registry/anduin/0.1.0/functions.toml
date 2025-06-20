@@ -1,0 +1,619 @@
+[ASSOC]
+description = "Prepares a container to replace an element at a given index with a new value."
+definition = "=func(\"assoc\", \"method\")"
+
+[ASSOC.arguments.func]
+description = "uniquestr"
+example = ""
+
+[ATTRIBUTES]
+description = "Gets a vector of all valid methods from a container."
+definition = "=func(\"attributes\", \"method\")"
+
+[ATTRIBUTES.arguments.func]
+description = ""
+example = ""
+
+[BACK]
+description = "Gets the last element of a container."
+definition = "=func(\"back\", \"method\")"
+
+[BACK.arguments.func]
+description = ""
+example = ""
+
+[C1ST]
+description = "Gets the first item in a pair."
+definition = "=first"
+
+[C1ST.arguments.first]
+description = ""
+example = ""
+
+[C1ST.arguments.second]
+description = ""
+example = ""
+
+[C2ND]
+description = "Gets the second item in a pair."
+definition = "=second"
+
+[C2ND.arguments.first]
+description = ""
+example = ""
+
+[C2ND.arguments.second]
+description = ""
+example = ""
+
+[CHMAP]
+description = ""
+definition = """
+=let(
+  _lookup, lambda(key,
+    lambda(hashes, object,
+      let(
+        hash_key, HASH(key),
+        _index, match(hash_key, hashes, ),
+        if(
+          isna(_index),
+          THROW(\"Key not found: \" & key),
+          object(C2ND)(_index)
+        )
+      )
+    )
+  ),
+
+  _assoc, lambda(key, value,
+    lambda(hashes, object,
+      let(
+        hash_key, HASH(key),
+        _index, match(hash_key, hashes, ),
+        if(
+          isna(_index),
+          let(
+            new_hashes, {hashes; hash_key},
+            new_object, CPAIR(object(C1ST)(PUSH)(key), object(C2ND)(PUSH)(value)),
+            CPAIR(new_hashes, new_object)
+          ),
+          let(
+            updated_object, CPAIR(
+              object(C1ST),
+              object(C2ND)(UPDATE)(_index)(value)
+            ),
+            CPAIR(hashes, updated_object)
+          )
+        )
+      )
+    )
+  ),
+
+  _assoc_pair, lambda(pair,
+    lambda(hashes, object,
+      let(
+        key, pair(C1ST),
+        value, pair(C2ND),
+        _assoc(key, value)(hashes, object)
+      )
+    )
+  ),
+
+  _dissoc, lambda(key,
+    lambda(hashes, object,
+      let(
+        hash_key, HASH(key),
+        _index, match(hash_key, hashes, ),
+        if(
+          isna(_index),
+          THROW(\"Key not found: \" & key),
+          CPAIR(index(if(hashes = hash_key, \"deleted\", hashes)), object)
+        )
+      )
+    )
+  ),
+
+  methods, lambda(_wrapper,
+    lambda(name,
+      lambda(hashes, object,
+        let(
+          _interface, _wrapper(_wrapper),
+          names, {\"raw\"; \"get\"; \"empty\"; \"size\"; \"push\"; \"push_array\"; \"to_array\"; \"attributes\"; \"assoc\"; \"conj\"; \"hash\"; \"update\"; \"dissoc\"; \"keys\"},
+
+          assoc, lambda(_payload, if(ISSTRUCT(_payload), _assoc_pair(_payload)(hashes, object)(_interface), lambda(value, _assoc(_payload, value)(hashes, object)(_interface)))),
+          
+          definitions, CHVEC
+            (PUSH)(object)
+            (PUSH)(lambda(key, _lookup(key)(hashes, object)))
+            (PUSH)(countif(hashes, \"<>deleted\") = 0)
+            (PUSH)(countif(hashes, \"<>deleted\"))
+            (PUSH)(assoc)
+            (PUSH)(lambda(array,
+              CPAIR(
+                {hashes; map(index(array,,1), HASH)},
+                CPAIR(
+                  object(C1ST)(PUSH_VECTOR)(index(array,,1)),
+                  object(C2ND)(PUSH_VECTOR)(index(array,,2))
+                )
+              )(_interface)))
+            (PUSH)(map(filter(sequence(rows(hashes)), hashes<>\"deleted\"), lambda(_index, {object(C1ST)(_index), object(C2ND)(_index)})))
+            (PUSH)(sort(names))
+            (PUSH)(assoc)
+            (PUSH)(assoc)
+            (PUSH)(HASH(
+              join(,sort(map(filter(sequence(rows(hashes)), hashes<>\"deleted\"), filter(hashes, hashes<>\"deleted\"),
+                lambda(_index, hash_key, 
+                  let(
+                    value, object(C2ND)(_index),
+                    hash_key&if(
+                      ISSTRUCT(value),
+                      HASH(value),
+                      value
+                    )
+                  )
+                ))))))
+            (PUSH)(assoc)
+            (PUSH)(lambda(key, _dissoc(key)(hashes, object)(_interface)))
+            (PUSH)(map(filter(sequence(rows(hashes)), hashes<>\"deleted\"), lambda(_index, object(C1ST)(_index)))),
+          _index, match(name, names, ),
+          if(
+            isna(_index),
+            THROW(\"Error in CHMAP: method '\"&name&\"' not found.\"),
+            definitions(_index)
+          )
+        )
+      )
+    )
+  ),
+
+  _interface_wrapper, lambda(self,
+    lambda(hashes, object,
+      lambda(_payload,
+        if(
+          ISMETHOD(_payload),
+          methods(self)(_payload(C1ST))(hashes, object),
+          if(
+            ISSTRUCT(_payload),
+            _assoc_pair(_payload)(hashes, object)(self(self)),
+            _lookup(_payload)(hashes, object)
+          )
+        )
+      )
+    )
+  ),
+
+  _interface_wrapper(_interface_wrapper)(tocol(,1), CPAIR(CHVEC, CHVEC))(payload)
+)"""
+
+[CHMAP.arguments.payload]
+description = ""
+example = ""
+
+[CHVEC]
+description = ""
+definition = """
+=let(
+  _29ple, lambda(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,
+    lambda(
+      func, func(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29)
+    )
+  ),
+
+  __get, lambda(n,
+      lambda(
+      _01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,
+      choose(n,
+        _01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29
+      )
+    )
+  ),
+
+  __update, lambda(n, value,
+    lambda(
+      _01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,
+
+      choose(n,
+        _29ple(value,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,value,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,value,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,value,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,value,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,value,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,value,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,value,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,value,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,value,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,value,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,value,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,value,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,value,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,value,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,value,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,value,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,value,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,value,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,value,_21,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,value,_22,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,value,_23,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,value,_24,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,value,_25,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,value,_26,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,value,_27,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,value,_28,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,value,_29),
+        _29ple(_01,_02,_03,_04,_05,_06,_07,_08,_09,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,value)
+      )
+    )
+  ),
+
+  _lookup, lambda(n, size, object,
+    if(
+      n > size,
+      THROW(\"Error in CHVEC (get): index \"&n&\" is out of bounds for CHVEC of size \"&size),
+      let(
+        converted_base, base(size - 1, 29),
+        depth, len(converted_base),
+        path, base(n - 1, 29, depth),
+        reduce(
+          object,
+          sequence(depth),
+          lambda(acc, i,
+            acc(__get(1 + decimal(mid(path, i, 1), 29)))
+          )
+        )
+      )
+    )
+  ),
+
+  _assoc_helper, lambda(func, object, value, path,
+    if(
+      path = \"\",
+      value,
+      object(__update(
+        1 + decimal(left(path), 29),
+        func(
+          func,
+          object(__get(1 + decimal(left(path), 29))),
+          value,
+          mid(path, 2, 9^9)
+        )
+      ))
+    )
+  ),
+  
+  _assoc, lambda(n, value, size, object,
+    let(
+      converted_base, base(size - 1, 29),
+      depth, len(converted_base),
+
+      path, base(n - 1, 29, depth),
+
+      CPAIR(size, _assoc_helper(_assoc_helper, object, value, path))
+    )
+  ),
+
+  _empty, lambda(func, depth,
+    let(
+      empty, if(depth = 1, NIL, func(func, depth - 1)),
+      _29ple(empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty)
+    )
+  ),
+
+  _expand, lambda(object, depth,
+    let(
+      empty, _empty(_empty, depth),
+      _29ple(object,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty,empty)
+    )
+  ),
+
+  _append, lambda(value,
+    lambda(size, object,
+      if(
+        size = 0,
+        _assoc(1, value, 1, object),
+        let(
+          converted_base, base(size - 1, 29),
+          depth, len(converted_base),
+
+          _assoc(size + 1, value, size + 1, if(len(base(size, 29)) = depth, object, _expand(object, depth)))
+        )
+      )
+    )
+  ),
+
+  _pop, lambda(size, object,
+    if(
+      size = 1,
+      CPAIR(0, _empty(_empty, 1)),
+      let(
+        removed, _assoc(size, NIL, size - 1, object),
+        converted_base, base(size - 1, 29),
+        new_converted_base, base(size - 2, 29),
+
+        if(
+          len(converted_base) = len(new_converted_base),
+          removed,
+          CPAIR(
+            size - 1,
+            removed(C2ND)(__get(1))
+          )
+        )
+      )
+    )
+  ),
+
+  methods, lambda(_wrapper, name, size, object,
+    let(
+      _interface, _wrapper(_wrapper),
+      names, {\"get\"; \"front\"; \"back\"; \"empty\"; \"size\"; \"push\"; \"push_vector\"; \"push_array\"; \"pop\"; \"raw\"; \"to_vector\"; \"attributes\"; \"assoc\"; \"conj\"; \"hash\"; \"update\"},
+      definitions, _29ple(
+        lambda(n, _lookup(n, size, object)),
+        _lookup(1, size, object),
+        _lookup(size, size, object),
+        size = 0,
+        size,
+        lambda(value, _append(value)(size, object)(_interface)),
+        lambda(vector, reduce(CPAIR(size, object), vector, lambda(acc, i, acc(_append(i))))(_interface)),
+        lambda(array, reduce(CPAIR(size, object), sequence(rows(array)), lambda(a_acc, a_i,
+          let(
+            row_chvec, CHVEC(METHOD(\"push_vector\"))(index(array, a_i, )),
+            a_acc(_append(row_chvec))
+          )
+        ))(_interface)),
+        if(size = 0, THROW(\"Error in CHVEC: cannot pop from empty array\"), _pop(size, object)(_interface)),
+        object,
+        if(size = 0, tocol(,1), reduce(tocol(,1), sequence(size), lambda(acc, i, {acc; _lookup(i, size, object)}))),
+        sort(filter(names, names<>\"hash\")),
+        lambda(n, if(n > size, THROW(\"Error in CHVEC (assoc): \"&n&\" is out of bounds for CHVEC of size \"&size), lambda(value, _assoc(n, value, size, object)(_interface)))),
+        lambda(value, _append(value)(size, object)(_interface)),
+        if(size = 0, HASH(\"this is an empty chvec\"), HASH(reduce(, sequence(size), lambda(acc, i, acc&HASH(_lookup(i, size, object)))))),
+        lambda(n, if(n > size, THROW(\"Error in CHVEC (update): \"&n&\" is out of bounds for CHVEC of size \"&size), lambda(value, _assoc(n, value, size, object)(_interface)))),
+        ,,,,,,,,,,,,
+      ),
+      idx, match(name, names,),
+      if(
+        isna(idx),
+        THROW(\"Error in CHVEC: method '\"&name&\"' not found.\"),
+        definitions(__get(idx))
+      )
+    )
+  ),
+
+  _interface_wrapper, lambda(self,
+    lambda(size, object,
+      lambda(_payload,
+        if(
+          ISMETHOD(_payload),
+          methods(self, _payload(C1ST), size, object),
+          if(
+            and(type(_payload) = 1, isnumber(_payload)),
+            _lookup(_payload, size, object),
+            _append(_payload)(size, object)(self(self))
+          )
+        )
+      )
+    )
+  ),
+
+  _interface_wrapper(_interface_wrapper)(0, _empty(_empty, 1))(payload)
+)"""
+
+[CHVEC.arguments.payload]
+description = ""
+example = ""
+
+[CONJ]
+description = "Conjoins an element to an array. Alias for PUSH."
+definition = "=func(\"conj\", \"method\")"
+
+[CONJ.arguments.func]
+description = ""
+example = ""
+
+[CPAIR]
+description = "Makes a pair."
+definition = """
+=lambda(func,
+  if(
+    ISMETHOD(func),
+    if(
+      func(C1ST)=\"hash\",
+      HASH(HASH(\"first\"&HASH(first))&HASH(second)),
+      func(first, second)
+    ),
+    func(first, second)
+  )
+)"""
+
+[CPAIR.arguments.first]
+description = ""
+example = ""
+
+[CPAIR.arguments.second]
+description = ""
+example = ""
+
+[DISSOC]
+description = "Prepares a container to disassociate an element at a given index/"
+definition = "=func(\"dissoc\", \"method\")"
+
+[DISSOC.arguments.func]
+description = ""
+example = ""
+
+[EMPTY]
+description = "Checks if a container is empty."
+definition = "=func(\"empty\", \"method\")"
+
+[EMPTY.arguments.func]
+description = ""
+example = ""
+
+[FRONT]
+description = "Gets the front element of a container."
+definition = "=func(\"front\", \"method\")"
+
+[FRONT.arguments.func]
+description = ""
+example = ""
+
+[GET]
+description = "Prepares a container to retrive a value at a given index."
+definition = "=func(\"get\", \"method\")"
+
+[GET.arguments.func]
+description = ""
+example = ""
+
+[HASH]
+description = ""
+definition = """
+=arrayformula(
+  if(
+    ISNIL(input),
+    \"9O3WHPAC\",
+    if(
+      ISSTRUCT(input),
+      ifna(input(METHOD(\"hash\")), \"YCRI94LU\"),
+      let(
+        numhash, lambda(num, 
+          ifs(
+            num = 1, \"11111111\",
+            num = 0, \"00000000\",
+            1, base(mod(2^50*iferror(log(num))+2^32-1,36^8),36,8)
+          )
+        ),
+        stringhash, lambda(str,
+          if(isblank(str), \"01Z141Z3\",
+            if(str=\"\", \"P3MQMMIW\",
+              let(
+                str, left(str, 64),
+                seq, sequence(len(str)),
+                chars, code(mid(str, seq, 1)),
+                weights, round(100000 * ln(seq + 1)),
+                base_sum, sumproduct(chars, weights),
+                alt_sum, sum(chars * mod(seq, 17)),
+                hval, base_sum + alt_sum * 1000,
+                numhash(hval)
+              )
+            )
+          )
+        ),
+        value, if(isref(input), {input}, input),
+        switch(
+          type(value),
+          1, numhash(value),
+          2, stringhash(value),
+          4, stringhash(\"bool\"&value),
+          16, stringhash(\"err\"&error.type(value)),
+          64, numhash(sumproduct(decimal(map(value, HASH), 36), log(31^sequence(rows(value), columns(value))))),
+          128, \"UE22N1UV\",
+          THROW(\"Unsupported type for hash.\")
+        )
+      )
+    )
+  )
+)"""
+
+[HASH.arguments.input]
+description = ""
+example = ""
+
+[HASH_EQ]
+description = ""
+definition = "=HASH(value1)=HASH(value2)"
+
+[HASH_EQ.arguments.value1]
+description = ""
+example = ""
+
+[HASH_EQ.arguments.value2]
+description = ""
+example = ""
+
+[ISMETHOD]
+description = ""
+definition = "=if(ISSTRUCT(value),ifna(value(lambda(a,b,b))=\"method\"))"
+
+[ISMETHOD.arguments.value]
+description = ""
+example = ""
+
+[METHOD]
+description = "Creates a method object."
+definition = "=lambda(func,func(name, \"method\"))"
+
+[METHOD.arguments.name]
+description = ""
+example = ""
+
+[POP]
+description = "Pops an element from a container."
+definition = "=func(\"pop\", \"method\")"
+
+[POP.arguments.func]
+description = ""
+example = ""
+
+[PUSH]
+description = "Prepares a container to receive a pushed element."
+definition = "=func(\"push\", \"method\")"
+
+[PUSH.arguments.func]
+description = ""
+example = ""
+
+[PUSH_ARRAY]
+description = "Pushes an array into a container."
+definition = "=func(\"push_array\", \"method\")"
+
+[PUSH_ARRAY.arguments.func]
+description = ""
+example = ""
+
+[PUSH_VECTOR]
+description = "Pushes a vector into a container."
+definition = "=func(\"push_vector\", \"method\")"
+
+[PUSH_VECTOR.arguments.func]
+description = ""
+example = ""
+
+[RAW]
+description = "Exposes the raw implementation of a container. Only use this if you know what you're doing."
+definition = "=func(\"raw\", \"method\")"
+
+[RAW.arguments.func]
+description = ""
+example = ""
+
+[SIZE]
+description = "Gets the size (e.g. number of elements) in a container."
+definition = "=func(\"size\", \"method\")"
+
+[SIZE.arguments.func]
+description = ""
+example = ""
+
+[TO_ARRAY]
+description = "Converts a container to an array, if possible."
+definition = "=func(\"to_array\", \"method\")"
+
+[TO_ARRAY.arguments.func]
+description = ""
+example = ""
+
+[TO_VECTOR]
+description = "Attempts to convert a container to a vector."
+definition = "=func(\"to_vector\", \"method\")"
+
+[TO_VECTOR.arguments.func]
+description = ""
+example = ""
+
+[UPDATE]
+description = "Updates an element at a given index in a container."
+definition = "=func(\"update\", \"method\")"
+
+[UPDATE.arguments.func]
+description = ""
+example = ""

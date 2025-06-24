@@ -1,4 +1,3 @@
-[project]
 name = "corelib"
 version = "0.1.0"
 description = "The core library for Astral's ecosystem."
@@ -6,4 +5,4 @@ authors = [
     "astral",
 ]
 
-[project.dependencies]
+[dependencies]
